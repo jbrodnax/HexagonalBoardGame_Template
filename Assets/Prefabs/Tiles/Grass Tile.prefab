@@ -1,0 +1,118 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &4873589888206702703
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 621501044502780400, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 621501044502780400, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_Color.b
+      value: 0.25863025
+      objectReference: {fileID: 0}
+    - target: {fileID: 621501044502780400, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_Color.g
+      value: 0.013883919
+      objectReference: {fileID: 0}
+    - target: {fileID: 621501044502780400, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_Color.r
+      value: 0.9811321
+      objectReference: {fileID: 0}
+    - target: {fileID: 1461913779399250870, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_Color.b
+      value: 0.9765041
+      objectReference: {fileID: 0}
+    - target: {fileID: 1461913779399250870, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_Color.g
+      value: 0.9809772
+      objectReference: {fileID: 0}
+    - target: {fileID: 1461913779399250870, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_Color.r
+      value: 0.9811321
+      objectReference: {fileID: 0}
+    - target: {fileID: 5993069467968342540, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5993069467968342540, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5993069467968342540, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5993069467968342540, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5993069467968342540, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5993069467968342540, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5993069467968342540, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5993069467968342540, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5993069467968342540, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5993069467968342540, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5993069467968342540, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8969777479610136793, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+      propertyPath: m_Name
+      value: Grass Tile
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+--- !u!1 &4600837371557769398 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8969777479610136793, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+  m_PrefabInstance: {fileID: 4873589888206702703}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-3846127320998073719
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4600837371557769398}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee1b70e2b31d60b4e94c4d5ab9f9deb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _renderer: {fileID: 6335362877996162009}
+  _highBrightness: 0.5
+  _darkenStrength: 0.7
+  _isWalkable: 1
+  TileName: Grass
+  OccupiedUnit: {fileID: 0}
+  Neighbors: []
+  _baseColor: {r: 0.33793542, g: 0.6981132, b: 0.20087217, a: 1}
+  _offsetColor: {r: 0.252103, g: 0.5283019, b: 0.14702742, a: 1}
+--- !u!212 &6335362877996162009 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 1461913779399250870, guid: 67a97dff301ffa84d9ea7d29945673c1, type: 3}
+  m_PrefabInstance: {fileID: 4873589888206702703}
+  m_PrefabAsset: {fileID: 0}
