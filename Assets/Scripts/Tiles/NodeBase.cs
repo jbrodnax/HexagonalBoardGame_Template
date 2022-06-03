@@ -47,26 +47,48 @@ public class NodeBase
     public void Reset() => G = H = 0;
 }
 
+
+public class Cube_Directions
+{
+    public Cube UP = new Cube(0, -1, 1);
+    public Cube DOWN = new Cube(0, 1, -1);
+    public Cube UP_RIGHT = new Cube(1, -1, 0);
+    public Cube UP_LEFT = new Cube(-1, 0, 1);
+    public Cube DOWN_RIGHT = new Cube(1, 0, -1);
+    public Cube DOWN_LEFT = new Cube(-1, 1, 0);
+
+    public Cube MapIndex(int i){
+        switch(i){
+            case 0:
+                return DOWN_RIGHT;
+            case 1:
+                return UP_RIGHT;
+            case 2:
+                return UP;
+            case 3:
+                return UP_LEFT;
+            case 4:
+                return DOWN_LEFT;
+            case 5:
+                return DOWN;
+            default:
+                Debug.LogError("Cube direction does not exist.");
+                return null;
+        }
+    }
+}
+
+
 public class Cube
 {
     public float q;
     public float r;
     public float s;
 
-    public List<Vector3> Cube_Directions;
-
     public Cube(float _q, float _r, float _s){
         q = _q;
         r = _r;
         s = _s;
-
-        Cube_Directions = new List<Vector3>();
-        Cube_Directions.Add(new Vector3(1, 0, -1));
-        Cube_Directions.Add(new Vector3(1, -1, 0));
-        Cube_Directions.Add(new Vector3(0, -1, 1));
-        Cube_Directions.Add(new Vector3(-1, 0, 1));
-        Cube_Directions.Add(new Vector3(-1, 1, -0));
-        Cube_Directions.Add(new Vector3(0, 1, -1));
     }
 
     public Vector2 GetAxial(){
@@ -100,42 +122,40 @@ public class Cube
         return this;
     }
 
+    public Vector3 GetCubeAsVector3(){
+        return (new Vector3(q,r,s));
+    }
     public float GetDistanceTo(Cube b){
         return ((Math.Abs(this.q - b.q) + Math.Abs(this.r - b.r) + Math.Abs(this.s - b.s)) / 2);
     }
 
-    public Cube Add(Cube a, Cube b = null){
-        if (b == null)
-            b = this;
+    public Cube Add(Cube a, Cube b){
         return new Cube(
             a.q + b.q,
             a.r + b.r,
             a.s + b.s
         );
     }
-    public Cube Scale(Vector3 v, int factor){
+    public Cube Scale(Cube a, int factor){
         return new Cube(
-            v.x * factor,
-            v.y * factor,
-            v.z * factor
+            a.q * factor,
+            a.r * factor,
+            a.s * factor
         );
     }
 
-    public Cube Neighbor(Cube c, Vector3 v){
-        return new Cube(
-            c.q + v.x,
-            c.r + v.y,
-            c.s + v.z
-        );
+    public Cube Neighbor(Cube c, Cube d){
+        return Add(c, d);
     }
     public List<Cube> Ring(Cube center, int radius){
+        var directions = new Cube_Directions();
         var results = new List<Cube>();
-        var nextCube = Add(center, Scale(Cube_Directions[4], radius));
+        var nextCube = Add(center, Scale(directions.DOWN_LEFT, radius));
 
         for (int i = 0; i < 6; i++){
             for (int j = 0; j < radius; j++){
                 results.Add(nextCube);
-                nextCube = Add(nextCube, Neighbor(nextCube, Cube_Directions[i]));
+                nextCube = Neighbor(nextCube, directions.MapIndex(i));
             }
         }
 

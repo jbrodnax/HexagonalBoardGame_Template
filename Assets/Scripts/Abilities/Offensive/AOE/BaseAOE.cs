@@ -13,8 +13,20 @@ public abstract class BaseAOE : OffensiveAbility
     protected override void InitAffectedTiles(){
         AffectedArea = GridManager.Instance.CalculateArea(SourceTile.nodeBase.Coords, radius);
         var affectedTiles = GridManager.Instance.GetTilesInArea(AffectedArea);
+
+        var centerCube = SourceTile.nodeBase.GetCubeFromThis();
+        var ringCubes = centerCube.Ring(centerCube, (int)radius);
+        
         foreach(Tile t in affectedTiles){
             t.SetAbilityEffectsController(TileEffectsController, true);
+        }
+
+        foreach(Cube c in ringCubes){
+            var tile = GridManager.Instance.GetTileByVector(c.GetAxial());
+            if (tile == null)
+                continue;
+            
+            tile.Highlight(TileEvent.Highlight);
         }
     }
 

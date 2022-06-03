@@ -22,7 +22,8 @@ public class MenuManager : MonoBehaviour
         }
 
         // Check if tile is traversable
-        message = tile.TileName;
+        var coords = tile.nodeBase.GetCubeFromThis();
+        message = tile.TileName + $"\n({coords.q},{coords.r},{coords.s})";
         if (!tile.Walkable)
             message += "(Not Walkable)";
 

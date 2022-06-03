@@ -47,7 +47,7 @@ MonoBehaviour:
   isTargetRequired: 0
   EndsTurn: 1
   ShaderHighlight: {r: 1, g: 0.36031806, b: 0, a: 0.90588236}
-  ShaderDarken: {r: 0.5943396, g: 0.21442841, b: 0, a: 0.90588236}
+  ShaderDarken: {r: 0, g: 0, b: 0, a: 0.77254903}
   HighlightBlender: 0.686
   DarkenBlender: 0.706
   AbilityName: Fireball
@@ -56,4 +56,4 @@ MonoBehaviour:
   BaseDamageMin: 50
   BaseDamageMax: 90
   DamageType: 1
-  MaxRange: 8
+  MaxRange: 6

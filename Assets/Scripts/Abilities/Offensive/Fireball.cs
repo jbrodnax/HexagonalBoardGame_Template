@@ -37,11 +37,10 @@ public class Fireball : OffensiveAbility
     * 'Move' ability will affect all tiles within range of the unit's max move distance.
     */   
     protected override void InitAffectedTiles(){
-        /*
+        
         var centerCube = SourceTile.nodeBase.GetCubeFromThis();
         var ringCubes = centerCube.Ring(centerCube, MaxRange);
         var ringTiles = new List<Tile>();
-    
         foreach(Cube c in ringCubes){
             var tile = GridManager.Instance.GetTileByVector(c.GetAxial());
             if (tile == null)
@@ -58,8 +57,8 @@ public class Fireball : OffensiveAbility
                     affectedTiles.Add(rt);
             }
         }
-        */
-        var affectedTiles = GridManager.Instance.FindReachable(SourceTile, MaxRange);
+        
+        //var affectedTiles = GridManager.Instance.FindReachable(SourceTile, MaxRange);
         foreach(Tile t in affectedTiles){
             t.SetAbilityEffectsController(TileEffectsController, true);
         }

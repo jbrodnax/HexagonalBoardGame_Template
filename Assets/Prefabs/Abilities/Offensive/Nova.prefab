@@ -46,15 +46,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isTargetRequired: 0
   EndsTurn: 1
-  ShaderHighlight: {r: 0.9811321, g: 0.37683386, b: 0.013883919, a: 0.8235294}
-  ShaderDarken: {r: 0.6886792, g: 0.17941532, b: 0, a: 1}
+  ShaderHighlight: {r: 0.015686247, g: 0.98039216, b: 0.9707499, a: 0.8235294}
+  ShaderDarken: {r: 0, g: 0.065570354, b: 1, a: 0.69411767}
   HighlightBlender: 0.752
   DarkenBlender: 0.426
   AbilityName: Nova
   AbilityType: 1
   TileEffectsPrefab: {fileID: 906028245728687334, guid: b599cf370bb45ef46bc445600d17bb9b, type: 3}
   BaseDamageMin: 10
-  BaseDamageMax: 50
+  BaseDamageMax: 70
   DamageType: 1
   radius: 4
   damageFallOff: 0.2
