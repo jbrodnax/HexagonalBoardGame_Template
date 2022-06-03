@@ -106,13 +106,14 @@ public abstract class BaseUnit : MonoBehaviour
             break;
          case AbilityType.AOE:
             var aoeAbility = (Nova)ability;
-            aoeAbility.Init(0f, OccupiedTile, this);
+            aoeAbility.Init(OccupiedTile, this);
             break;
          case AbilityType.Cleave:
             // TKTK
             break;
          case AbilityType.Projectile:
-            // TKTK
+            var projAbility = (OffensiveAbility)ability;
+            projAbility.Init(OccupiedTile, this);
             break;
          case AbilityType.Movement:
             var moveAbility = (Move)ability;

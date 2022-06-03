@@ -15,11 +15,11 @@ public abstract class OffensiveAbility : BaseAbility
     protected float appliedDamage = -1;
 
 
-    public virtual OffensiveAbility Init(float mod, Tile origin, BaseUnit callerUnit){
+    public virtual OffensiveAbility Init(Tile origin, BaseUnit callerUnit){
         AffectedUnits = new Dictionary<BaseUnit, float>();
-        modifier = mod;
-        sourceTile = origin;
+        SourceTile = origin;
         Unit = callerUnit;
+        GetDamageModifier();
         rollActualBaseDamage();
         
         return this;
@@ -36,6 +36,11 @@ public abstract class OffensiveAbility : BaseAbility
     public float GetBaseDamage(){
         // TKTK - shift actual damage based on applicable buffs
         return appliedDamage;
+    }
+
+    public void GetDamageModifier(){
+        // TKTK - Get damage modifiers from the caller unit.
+        return;
     }
 
 }

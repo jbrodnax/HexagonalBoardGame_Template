@@ -151,9 +151,15 @@ public class GridManager : MonoBehaviour
 
             foreach(Tile t in fringes[k-1]){
                 foreach (Tile neighbor in t.Neighbors){
-                    if ((!visited.Contains(neighbor)) && neighbor.Walkable){
-                        visited.Add(neighbor);
-                        fringes[k].Add(neighbor);
+                    if (!visited.Contains(neighbor)){
+                        // Add the tile to visited if it has a player on it, but don't branch from it
+                        if (!neighbor.Walkable && neighbor.OccupiedUnit != null){
+                            visited.Add(neighbor);
+                            continue;
+                        } else if (neighbor.Walkable){
+                            visited.Add(neighbor);
+                            fringes[k].Add(neighbor);
+                        }
                     }
                 }
             }
@@ -251,5 +257,26 @@ public class GridManager : MonoBehaviour
             return tile;
 
         return null;
+    }
+
+    public float lerp(float a, float b, float t){
+        return (a + (b - a) * t);
+    }
+
+    public Cube cube_lerp(Cube a, Cube b, float t){
+        return new Cube(
+            lerp(a.q, b.q, t),
+            lerp(a.r, b.r, t),
+            lerp(a.s, b.s, t)
+        );
+    }
+
+    public List<Cube> cube_linedraw(Cube a, Cube b){
+        var N = a.GetDistanceTo(b);
+        List<Cube> results = new List<Cube>();
+
+        for (var i = 0; i <= N; i++)
+            results.Add(cube_lerp(a, b, (1.0f/N * i)).Round(true));
+        return results;
     }
 }

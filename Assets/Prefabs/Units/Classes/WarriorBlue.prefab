@@ -100,12 +100,14 @@ MonoBehaviour:
   Health: 120
   Armor: 0.4
   MagicResist: 0.219
-  DistancePerTurn: 4
+  DistancePerTurn: 5
   AbilitiesConfig:
   - abilityPrefab: {fileID: 382792092602296448, guid: dc38b5716c2a3ab4680dccc8df38dc53, type: 3}
     binding: 49
   - abilityPrefab: {fileID: 1377883224753548083, guid: 8b03cc7ad64e3c94a9ef81fb318269c0, type: 3}
     binding: 50
+  - abilityPrefab: {fileID: 4908767133395472827, guid: 3ab025070ec6a46439620f6fab19a0a5, type: 3}
+    binding: 51
   animator: {fileID: 0}
   Faction: 1
   UnitName: Sexy Little Thang

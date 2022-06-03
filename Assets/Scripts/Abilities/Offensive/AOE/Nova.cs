@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Nova : BaseAOE
 {
-    public override OffensiveAbility Init(float mod, Tile origin, BaseUnit callerUnit)
+    public override OffensiveAbility Init(Tile origin, BaseUnit callerUnit)
     {
-        var ret = base.Init(mod, origin, callerUnit);
+        var ret = base.Init(origin, callerUnit);
 
         //Create the TileEffects instance for this ability
         TileEffectsController = Instantiate(TileEffectsPrefab).Init(

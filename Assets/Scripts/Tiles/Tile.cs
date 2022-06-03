@@ -49,9 +49,6 @@ public abstract class Tile : MonoBehaviour
 
     // Player (Hero) clicked this tile to move to
     void OnMouseDown(){
-        if (!_isWalkable)
-            return;
-        
         if (AbilityEffectsController != null){
             AbilityEffectsController.OnMouseDown(this);
             return;
