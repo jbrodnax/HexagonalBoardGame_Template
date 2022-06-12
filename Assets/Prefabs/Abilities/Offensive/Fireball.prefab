@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8885896838499373397}
-  - component: {fileID: 4908767133395472827}
+  - component: {fileID: 5807029455287119303}
   m_Layer: 0
   m_Name: Fireball
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4908767133395472827
+--- !u!114 &5807029455287119303
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,19 +41,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 3235339603092781689}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04b97e3241d5f794e9348c8cb89f02d0, type: 3}
+  m_Script: {fileID: 11500000, guid: 544e8b0b18528a148932fb60e470329b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isTargetRequired: 0
   EndsTurn: 1
-  ShaderHighlight: {r: 1, g: 0.36031806, b: 0, a: 0.90588236}
-  ShaderDarken: {r: 0, g: 0, b: 0, a: 0.77254903}
-  HighlightBlender: 0.686
-  DarkenBlender: 0.706
+  ShaderHighlight: {r: 1, g: 0.52179044, b: 0, a: 0.90588236}
+  ShaderDarken: {r: 0.5566038, g: 0.20081392, b: 0, a: 1}
+  HighlightBlender: 0.832
+  DarkenBlender: 0.752
   AbilityName: Fireball
   AbilityType: 3
   TileEffectsPrefab: {fileID: 906028245728687334, guid: b599cf370bb45ef46bc445600d17bb9b, type: 3}
   BaseDamageMin: 50
-  BaseDamageMax: 90
+  BaseDamageMax: 80
   DamageType: 1
   MaxRange: 6
+  Pierce: 0

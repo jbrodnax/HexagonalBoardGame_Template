@@ -1,17 +1,34 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
-public abstract class BaseAOE : OffensiveAbility
+public class BaseAOE : OffensiveAbility
 {
     [SerializeField] public float radius;
     [SerializeField] [Range(0.0f,1.0f)] private float damageFallOff;
     [SerializeField] private bool moveAble;
-    //public List<Tile> AffectedTiles;
+    //protected List<Tile> AffectedTiles;
     protected List<Vector2> AffectedArea; 
 
+    public override OffensiveAbility Init(Tile origin, BaseUnit callerUnit)
+    {
+        var ret = base.Init(origin, callerUnit);
+
+        //Create the TileEffects instance for this ability
+        TileEffectsController = Instantiate(TileEffectsPrefab).Init(
+            ShaderHighlight, 
+            ShaderDarken, 
+            HighlightBlender, 
+            DarkenBlender,
+            TileEvent.UnHighlight
+        );
+        InitAffectedTiles();
+        return ret;
+    }
+
     protected override void InitAffectedTiles(){
-        AffectedArea = GridManager.Instance.CalculateArea(SourceTile.nodeBase.Coords, radius);
+        AffectedArea = SourceTile.nodeBase.CalculateArea(radius);
         var affectedTiles = GridManager.Instance.GetTilesInArea(AffectedArea);
 
         var centerCube = SourceTile.nodeBase.GetCubeFromThis();
@@ -21,6 +38,7 @@ public abstract class BaseAOE : OffensiveAbility
             t.SetAbilityEffectsController(TileEffectsController, true);
         }
 
+        // Hightlight the outer ring of tiles (so it looks pretty lol)
         foreach(Cube c in ringCubes){
             var tile = GridManager.Instance.GetTileByVector(c.GetAxial());
             if (tile == null)
@@ -36,11 +54,39 @@ public abstract class BaseAOE : OffensiveAbility
         return (appliedDamage -= ((damageFallOff * level) * appliedDamage));
     }
 
-}
+    public override bool Trigger(){
+        // Gather up the affected units
+        var tiles = GridManager.Instance.AffectedTiles;
+        var units = tiles.ToList().Where(
+                t => t.OccupiedUnit != null && t.OccupiedUnit != Unit
+            ).Select(
+                t => t.OccupiedUnit
+            );
 
-/*
-public struct AffectedTilesRing{
-    public List<Tile> Tiles;
-    public int RingLevel;
+        // Calculate distance to affected units and apply the damage
+        foreach (BaseUnit u in units){
+            var dist = SourceTile.nodeBase.GetAxialDistance(u.OccupiedTile.nodeBase);
+            var damage = GetAppliedDamageFallOff((int)dist);
+            Debug.Log($"Affected Player Distance: {dist}");
+
+            switch(DamageType){
+                case DamageType.Magic:
+                    u.ApplyMagicDamage(damage);
+                    return true;
+                case DamageType.Physical:
+                    u.ApplyPhysicalDamage(damage);
+                    return true;
+                default:
+                    Debug.Log("BaseAOE:Trigger has invalid DamageType.");
+                    return false;
+            }
+        }
+
+        return true;
+    }
+    public override void CleanUp(){
+        GridManager.Instance.ResetAffectedTiles();
+        Destroy(TileEffectsController.gameObject);
+        Destroy(gameObject);
+    }
 }
-*/

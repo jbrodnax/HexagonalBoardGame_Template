@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7856221457799367336}
   - component: {fileID: 7078874959167444399}
   - component: {fileID: 5546138963033383100}
+  - component: {fileID: 7415692139092016956}
   m_Layer: 0
   m_Name: WarriorBlue
   m_TagString: Untagged
@@ -27,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 8824132899650951823}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 4, y: 4, z: 1}
+  m_LocalScale: {x: 3.5, y: 3.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -104,12 +105,32 @@ MonoBehaviour:
   AbilitiesConfig:
   - abilityPrefab: {fileID: 382792092602296448, guid: dc38b5716c2a3ab4680dccc8df38dc53, type: 3}
     binding: 49
-  - abilityPrefab: {fileID: 1377883224753548083, guid: 8b03cc7ad64e3c94a9ef81fb318269c0, type: 3}
+  - abilityPrefab: {fileID: 6731869066745356952, guid: 8b03cc7ad64e3c94a9ef81fb318269c0, type: 3}
     binding: 50
-  - abilityPrefab: {fileID: 4908767133395472827, guid: 3ab025070ec6a46439620f6fab19a0a5, type: 3}
+  - abilityPrefab: {fileID: 5807029455287119303, guid: 3ab025070ec6a46439620f6fab19a0a5, type: 3}
     binding: 51
-  animator: {fileID: 0}
+  animator: {fileID: 7415692139092016956}
   Faction: 1
   UnitName: Sexy Little Thang
   unitState: 0
   classType: 1
+--- !u!95 &7415692139092016956
+Animator:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8824132899650951823}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 3dc3e2e55a39dd341b73e4e23a9e1ee5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0

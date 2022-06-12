@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 // 'abstract' - indicates that the thing being modified (class Tile in this case) has an incomplete implementation,
 //      i.e. this is a base class that is inheritted and should never be instantiated on its own.
@@ -12,12 +14,18 @@ public abstract class Tile : MonoBehaviour
     [SerializeField] [Range(0f, 1f)] protected float _darkenStrength;
     // Defines whether or not a tile is traversable (e.g. grass vs mountain)
     [SerializeField] private bool _isWalkable;
+    [SerializeField] private int movementCost;
+    
+    private TextMeshPro displayText;
+    private int distance;
+    public int Distance {get{return distance;}set{distance = value;displayText.text = $"{value}";}}
+    public Tile Previous;
+    public int Infinity = 10000;
 
+    public int MovementCost {get{return movementCost;}set{movementCost = value;}}
     public NodeBase nodeBase;
     public string TileName;
     public BaseUnit OccupiedUnit;
-
-    public bool PreviewMovementEnabled {get; set;}
 
     // Walkable is true if this terrain is traversable and is not currently occupied by another unit
     public bool Walkable => _isWalkable && OccupiedUnit == null;
@@ -38,9 +46,12 @@ public abstract class Tile : MonoBehaviour
     {
         nodeBase = new NodeBase(this, coords);
         this.name = $"Tile {coords.x} {coords.y}";
-        PreviewMovementEnabled = false;
         Reachable = false;
         EffectsDelegate = _defaultHighlight;
+        distance = Infinity;
+        Previous = null;
+        displayText = GetComponentInChildren<TextMeshPro>();
+        displayText.enabled = false;
     }
 
     public void SetNeighbors(List<Tile> neighbors){
@@ -137,18 +148,26 @@ public abstract class Tile : MonoBehaviour
 
     /*
      * ONLY CALL FROM GRIDMANAGER
+     * (Also: Distance and Previous should be reset no sooner than after the turn has ended)
     */
     public void Reset(){
         if (AbilityEffectsController != null){
-            Debug.Log($"{TileName} has been reset.");
             _renderer.color = AbilityEffectsController.Unset(this);
             EffectsDelegate = _defaultHighlight;
             AbilityEffectsController = null;
             Reachable = false;
-            //GridManager.Instance.AffectedTiles.Remove(this);
             return;
         }
         _renderer.color = _original;
+    }
+
+    public void ToggleDisplayCost(){
+        displayText.enabled = !displayText.enabled;
+    }
+
+    public void DisplayCellCoords(Vector2Int v3){
+        TextMeshPro displayText = GetComponentInChildren<TextMeshPro>();
+        displayText.text = $"({v3.x},{v3.y})";
     }
 }
 

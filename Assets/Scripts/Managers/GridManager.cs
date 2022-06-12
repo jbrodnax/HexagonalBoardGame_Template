@@ -4,10 +4,14 @@ using System.Linq;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Tilemaps;
 
 public class GridManager : MonoBehaviour
 {
-    [SerializeField] public float radius;
+    private float radius;
+    [SerializeField] private Grid grid;
+    [SerializeField] private Tilemap tilemap;
+    [SerializeField] private TileReplacement[] spriteToPrefabLinks;
     [SerializeField] private Tile _tileGrassPrefab, _tileMountainPrefab;
     [SerializeField] private Transform camTransform;
     private Camera mainCamera;
@@ -18,12 +22,27 @@ public class GridManager : MonoBehaviour
     public Queue<Tile> AffectedTiles;
     public List<Tile> OptimalPath;
 
+    public Dictionary<Tile,Tile> TraversalConnections;
+    public Dictionary<Tile,int> TraversalCosts;
+
+
     void Awake(){
         Instance = this;
     }
 
+    void Start(){
+        
+    }
+
+    void Update(){
+        if (Input.GetKeyDown(KeyCode.V)){
+            ToggleDistanceCost();
+        }
+    }
+
     // Instantiate tiles to create grid/board
     public void GenerateAxialHexagram(){
+        radius = (float)MainMenuManager.Instance.MapSize;
         _tiles = new Dictionary<Vector2, Tile>();
         AffectedTiles = new Queue<Tile>();
         bool colorOffset = false;
@@ -59,6 +78,89 @@ public class GridManager : MonoBehaviour
 
         // Change GameManager's State after creating the board
         GameManager.Instance.ChangeState(GameState.SpawnTeams);
+    }
+
+    public void GenerateBoardFromTilemap(){
+        _tiles = new Dictionary<Vector2, Tile>();
+        AffectedTiles = new Queue<Tile>();
+
+        var oddColOffset = grid.cellSize.x / 2;
+        var ySpacing = Mathf.Sqrt(3)/2;
+        var xSpacing = (3f/4f);
+        tilemap.CompressBounds();
+
+        foreach (var position in tilemap.cellBounds.allPositionsWithin) {
+            if (!tilemap.HasTile(position)) {
+                continue;
+            }
+            var tileSprite = tilemap.GetTile(position);
+            var worldPos = grid.GetCellCenterWorld(position);
+            Vector2 v2 = new Vector2(worldPos.x, worldPos.y);
+            
+            foreach (TileReplacement tr in spriteToPrefabLinks){
+                if (tr.TileSprite.name.Equals(tileSprite.name)){
+                    var newTile = Instantiate(tr.TilePrefab, v2, Quaternion.identity);
+                    Vector2Int coords = new Vector2Int();
+                    coords.x = Mathf.RoundToInt(v2.x/xSpacing);
+
+                    if (coords.x % 2 != 0){
+                        if (v2.y > 0 && v2.y < ySpacing)
+                            coords.y = 1;//Mathf.RoundToInt((v2.y) / oddColOffset);
+                        else if (v2.y > 0 && v2.y > ySpacing)
+                            coords.y = Mathf.RoundToInt((v2.y - oddColOffset) / (ySpacing))+1;
+                        else if (v2.y < 0)
+                            coords.y = Mathf.RoundToInt((v2.y + oddColOffset) / (ySpacing));
+                        else
+                            Debug.Log($"Reached odd case: {coords}");
+                    }else{
+                        coords.y = Mathf.RoundToInt((v2.y) / ySpacing);
+                    }
+
+                    // Invert y-axis
+                    coords.y = -coords.y;
+                    //Debug.Log($"Offset Coords: {coords}");
+                    //newTile.DisplayCellCoords(coords);
+
+                    var axialCoords = OddqToAxial(coords);
+                    //Debug.Log($"Axial Coords: {axialCoords}");
+
+                    newTile.Init(axialCoords, false);
+                    _tiles[axialCoords] = newTile;
+                }
+            }
+        }
+
+        TilemapRenderer tmRend = tilemap.GetComponent<TilemapRenderer>();
+        Destroy(tmRend);
+        Destroy(tilemap);
+        // Reposition camera to center of board
+        camTransform.transform.position = new Vector3(0, 0, -5);
+        mainCamera = Camera.main;
+        mainCamera.orthographicSize = ((float)tilemap.size.x / 2) + 0.5f;
+
+        // Populate neighbor tracking for each tile
+        initTileNeighbors();
+        
+        // Change GameManager's State after creating the board
+        GameManager.Instance.ChangeState(GameState.SpawnTeams);
+    }
+
+    public Vector3Int OddqToCube(Vector2Int v2){
+        var q = v2.x;
+        var r = v2.y - (v2.x - (v2.x & 1)) / 2;
+        return new Vector3Int(q, r, -q-r);
+    }
+
+    public Vector2Int OddqToAxial(Vector2Int v2){
+        var q = v2.x;
+        var r = v2.y - (v2.x - (v2.x & 1)) / 2;
+        return new Vector2Int(q, r);
+    }
+
+    public void ToggleDistanceCost(){
+        foreach (KeyValuePair<Vector2,Tile> item in _tiles){
+            item.Value.ToggleDisplayCost();
+        }
     }
 
     public Tile GetRandomTile(){
@@ -119,130 +221,54 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public float GetDistance(Tile src, Tile dst){
-        return (GetDistance(src.nodeBase.Coords, dst.nodeBase.Coords));
+    /*
+     * Checks if the tile cooresponding to the given cube coordinates is traversable.
+     * If the tile DNE, then the tile is not traversable unless 'existance = false'.
+    */
+    public bool isCubeTraversable(Cube a, bool existance = true){
+        var tile = GetTileByVector(a.GetAxial());
+        if (tile == null)
+            return (existance ? false : true);
+
+        return (tile.Walkable);
     }
 
-    public float GetDistance(Vector2 a, Vector2 b){
-        return ((Mathf.Abs(a.x - b.x) + Mathf.Abs(a.x + a.y - b.x - b.y) + Mathf.Abs(a.y - b.y))/2);
+    public bool isCubeTargettable(Cube a){
+        var tile = GetTileByVector(a.GetAxial());
+        if (tile == null)
+            return false;
+        
+        if (!tile.Walkable && tile.OccupiedUnit == null)
+            return false;
+        
+        if (!tile.Walkable && tile.OccupiedUnit != null)
+            return true;
+        
+        Debug.Log("Reached odd case in isCubeTargettable.");
+        return false;
     }
 
     public Tile GetTileByVector(Vector2 v){
         Tile tile = null;
         _tiles.TryGetValue(v, out tile);
-        if (tile == null){
-            Debug.Log($"Failed to get tile at vector ({v.x}, {v.y})");
-        }
         return tile;
     }
 
-    public List<Tile> FindReachable(Tile src, int distance){
-        List<Tile> visited = new List<Tile>();
-        visited.Add(src);
-
-        List<List<Tile>> fringes = new List<List<Tile>>();
-        List<Tile> origin = new List<Tile>();
-        origin.Add(src);
-        fringes.Add(origin);
-
-        for (int k = 1; k <= distance; k++){
-            var tmp = new List<Tile>();
-            fringes.Add(tmp);
-
-            foreach(Tile t in fringes[k-1]){
-                foreach (Tile neighbor in t.Neighbors){
-                    if (!visited.Contains(neighbor)){
-                        // Add the tile to visited if it has a player on it, but don't branch from it
-                        if (!neighbor.Walkable && neighbor.OccupiedUnit != null){
-                            visited.Add(neighbor);
-                            continue;
-                        } else if (neighbor.Walkable){
-                            visited.Add(neighbor);
-                            fringes[k].Add(neighbor);
-                        }
-                    }
-                }
-            }
+    public List<Tile> GetTilesFromCubes(List<Cube> cubes){
+        List<Tile> tiles = new List<Tile>();
+        foreach(Cube c in cubes){
+            
+            var t = GetTileByVector(c.GetAxial());
+            if (t != null)
+                tiles.Add(t);
         }
-
-        return visited;
-    }
-
-    public List<Tile> FindPath(Tile src, Tile dst, bool onlyReachable = false){
-        List<Tile> path = new List<Tile>();
-
-        var toSearch = new List<NodeBase>() {src.nodeBase };
-        var processed = new List<NodeBase>();
-
-        while (toSearch.Any()){
-            var current = toSearch[0];
-            foreach (var t in toSearch){
-                if (t.F < current.F || t.F == current.F && t.H < current.H)
-                    current = t;
-            }
-
-            processed.Add(current);
-            toSearch.Remove(current);
-            current.Reset();
-
-            if (current == dst.nodeBase){
-                var currentPathTile = dst.nodeBase;
-                var count = 1000;
-                while (currentPathTile != src.nodeBase){
-                    path.Add(currentPathTile.tile);
-                    currentPathTile = currentPathTile.Connection;
-
-                    count--;
-                    if (count < 0) throw new Exception();
-                }
-
-                return path;
-            }
-
-            foreach (var neighborTile in current.tile.Neighbors.Where(t => t.Walkable && !processed.Contains(t.nodeBase))){
-                if (onlyReachable && !neighborTile.Reachable)
-                    continue;
-                var neighbor = neighborTile.nodeBase;
-                var inSearch = toSearch.Contains(neighbor);
-                var costToNeighbor = current.G + current.GetDistance(neighbor);
-
-                if (!inSearch || costToNeighbor < neighbor.G){
-                    neighbor.SetG(costToNeighbor);
-                    neighbor.SetConnection(current);
-
-                    if (!inSearch){
-                        neighbor.SetH(neighbor.GetDistance(dst.nodeBase));
-                        toSearch.Add(neighbor);
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    // Find all vectors/tiles within the given radius from center
-    public List<Vector2> CalculateArea(Vector2 center, float radius){
-        List<Vector2> map = new List<Vector2>();
-
-        var N = radius;
-        var _N = (0 - radius);
-
-        for (float q = _N; q <= N; q++){
-            var rLower = Math.Max(_N, ((0-q)+_N));
-            var rUpper = Math.Min(N, ((0-q)+N));
-
-            for (float r = rLower; r <= rUpper; r++){
-                map.Add(new Vector2(center.x + q, center.y + r));
-            }
-        }
-        return map;
+        return tiles;
     }
 
     public List<Tile> GetTilesInArea(List<Vector2> area){
         List<Tile> tiles = new List<Tile>();
         foreach(var v in area){
-            var tmp = GetTileAtPosition(v);
+            var tmp = GetTileByVector(v);
             if (tmp == null)
                 continue;
             tiles.Add(tmp);
@@ -250,33 +276,55 @@ public class GridManager : MonoBehaviour
         return tiles;
     }
 
-    // Get the tile referenced by Vector2 position or return null
-    public Tile GetTileAtPosition(Vector2 pos)
-    {
-        if(_tiles.TryGetValue(pos, out var tile))
-            return tile;
-
-        return null;
+    public List<Tile> GetTilesInMovementRange(int range){
+        return _tiles.Select(t => t.Value).Where(t => t.Distance <= range).ToList();
     }
 
-    public float lerp(float a, float b, float t){
-        return (a + (b - a) * t);
+    /*
+     * Implements Dijkstra's algorithm to calculate the cost from the src tile
+     * to all other tiles on the map. Called at the start of each turn, setting
+     * the src tile as the newly active unit's occupied tile.
+    */
+    public void CalculateMapTraversal(Tile src){
+        var Q = new List<Tile>();
+
+        foreach (KeyValuePair<Vector2,Tile> item in _tiles){
+            if (!item.Value.Walkable)
+                continue;
+            Q.Add(item.Value);
+            item.Value.Distance = item.Value.Infinity;
+            item.Value.Previous = null;
+        }
+
+        Q.Add(src);
+        src.Distance = 0;
+
+        while(Q.Count > 0){
+            var u = Q.OrderBy(t => t.Distance).First();
+            Q.Remove(u);
+
+            foreach(Tile t in u.Neighbors){
+                if (!Q.Contains(t))
+                    continue;
+
+                var alt = u.Distance + t.MovementCost;
+                if (alt < t.Distance && u.Distance != u.Infinity){
+                    t.Distance = alt;
+                    t.Previous = u;
+                }
+            }
+        }
     }
 
-    public Cube cube_lerp(Cube a, Cube b, float t){
-        return new Cube(
-            lerp(a.q, b.q, t),
-            lerp(a.r, b.r, t),
-            lerp(a.s, b.s, t)
-        );
+    public void DisplayTileNumbers(){
+        foreach (KeyValuePair<Vector2,Tile> item in _tiles){
+            item.Value.ToggleDisplayCost();
+        }
     }
+}
 
-    public List<Cube> cube_linedraw(Cube a, Cube b){
-        var N = a.GetDistanceTo(b);
-        List<Cube> results = new List<Cube>();
-
-        for (var i = 0; i <= N; i++)
-            results.Add(cube_lerp(a, b, (1.0f/N * i)).Round(true));
-        return results;
-    }
+[Serializable]
+public struct TileReplacement{
+    public TileBase TileSprite;
+    public Tile TilePrefab;
 }

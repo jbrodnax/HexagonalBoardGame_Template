@@ -25,16 +25,6 @@ public class UnitManager : MonoBehaviour
         if (!ActiveUnit)
             return;
 
-        //if (Input.GetKeyDown(KeyCode.Alpha1)){
-            // Unit will perform validation of the move
-        //    MoveUnit(ActiveUnit);
-        //}
-
-        // TKTK - fix this. Make 'move' an ability?
-        //if (Input.GetKeyDown(KeyCode.A)){
-        //    SelectMove();
-        //}
-
         if (Input.GetKeyDown(KeyCode.Escape)){
             ActiveUnit.DeselectAbility();
         }
@@ -62,12 +52,10 @@ public class UnitManager : MonoBehaviour
 
     // Spawn all the teams and then change gamestate to await first turn
     public void SpawnAllTeams(List<Faction> teams){
-
         TeamManager.Instance.Init(teams);
 
-        foreach (Faction f in teams){
+        foreach (Faction f in teams)
             SpawnTeam(f);
-        }
 
         GameManager.Instance.ChangeState(GameState.AwaitTurn);
     }
@@ -153,12 +141,13 @@ public class UnitManager : MonoBehaviour
         // TKTK - update TeamManager and possibly GameManager?
     }
 
-    public void beginTurn(){
+    public BaseUnit beginTurn(){
         TeamManager.Instance.nextTurn();
         TeamManager.Instance.ActiveTeam.nextTurn();
         ActiveUnit = TeamManager.Instance.ActiveTeam.ActiveUnit;
         MenuManager.Instance.ShowActiveUnit(ActiveUnit);
         ActiveUnit.OccupiedTile.Highlight(TileEvent.Highlight);
+        return ActiveUnit;
     }
 
     // Called when GameState is changed to EndTurn (duh)

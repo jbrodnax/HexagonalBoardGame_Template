@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System;
 using UnityEngine;
 
@@ -14,6 +15,15 @@ public class NodeBase
     public float r {get; set;}
     public float q {get; set;}
     public Vector2 Coords {get; set;}
+
+    public Vector2[] directions = new Vector2[]{
+        new Vector2(1, 0),  //Down right
+        new Vector2(1, -1), //Up right
+        new Vector2(0, -1), //Up
+        new Vector2(-1, 0), //Up left
+        new Vector2(-1, 1), //Down left
+        new Vector2(0, 1),  //Down
+    };
 
     public NodeBase(Tile t, Vector2 coords){
         tile = t;
@@ -30,7 +40,7 @@ public class NodeBase
 
     public void SetH(float h) => H = h;
 
-    public float GetDistance(NodeBase targetNode){
+    public float GetAxialDistance(NodeBase targetNode){
         var dcol = Math.Abs(q - targetNode.q);
         var drow = Math.Abs(r - targetNode.r);
         return (dcol + Math.Max(0, ((drow - dcol)/2)));
@@ -42,6 +52,83 @@ public class NodeBase
 
     public Cube GetCubeFromThis(){
         return (GetCubeFromAxial(Coords));
+    }
+
+    /*
+     * Returns a list of all Axial coords within a given distance of the this nodeBase instance's tile.
+    */
+    public List<Vector2> CalculateArea(float radius){
+        List<Vector2> map = new List<Vector2>();
+
+        var N = radius;
+        var _N = (0 - radius);
+
+        for (float q = _N; q <= N; q++){
+            var rLower = Math.Max(_N, ((0-q)+_N));
+            var rUpper = Math.Min(N, ((0-q)+N));
+
+            for (float r = rLower; r <= rUpper; r++){
+                map.Add(new Vector2(this.q + q, this.r + r));
+            }
+        }
+        return map;
+    }
+
+    // TKTK - implement reachable
+    public List<NodeBase> FindOptimalPath(NodeBase dest, bool onlyReachable = false){
+        Debug.Log("Move: FindOptimalPath Enter");
+        var path = new List<NodeBase>();
+
+        var toSearch = new List<NodeBase>(){this};
+        var processed = new List<NodeBase>();
+
+        while (toSearch.Any()){
+            var current = toSearch[0];
+            foreach (var t in toSearch){
+                if (t.F < current.F || t.F == current.F && t.H < current.H)
+                    current = t;
+            }
+
+            processed.Add(current);
+            toSearch.Remove(current);
+            current.Reset();
+
+            if (current == dest){
+                var currentPathNode = dest;
+                var count = 1000;
+                while (currentPathNode != this){
+                    path.Add(currentPathNode);
+                    currentPathNode = currentPathNode.Connection;
+
+                    count--;
+                    if (count < 0) throw new Exception();
+                }
+
+                return path;
+            }
+
+            foreach (var neighborTile in current.tile.Neighbors.Where(
+                t => t.Walkable && !processed.Contains(t.nodeBase)))
+            {   
+                var neighbor = neighborTile.nodeBase;
+                var inSearch = toSearch.Contains(neighbor);
+                var costToNeighbor = current.G + current.GetAxialDistance(neighbor);
+
+                if (!inSearch || costToNeighbor < neighbor.G){
+                    neighbor.SetG(costToNeighbor);
+                    neighbor.SetConnection(current);
+
+                    if (!inSearch){
+                        neighbor.SetH(neighbor.GetAxialDistance(dest));
+                        toSearch.Add(neighbor);
+                    }
+                }
+            }
+        }
+
+        Debug.Log("Move: FindOptimalPath Exit");
+
+        return null;
     }
 
     public void Reset() => G = H = 0;
@@ -91,35 +178,47 @@ public class Cube
         s = _s;
     }
 
+    public override string ToString()
+    {
+        return $"({q}, {r}, {s})";
+    }
+
     public Vector2 GetAxial(){
         return (new Vector2(q,r));
     }
 
-    public Cube Round(bool b){
-        q = Mathf.Round(this.q);
-        r = Mathf.Round(this.r);
-        s = Mathf.Round(this.s);
+    public Cube Round(Cube a){
+        Debug.Log($"Rounding: {a.ToString()}");
+        var _q = Mathf.Round(a.q);
+        var _r = Mathf.Round(a.r);
+        var _s = Mathf.Round(a.s);
 
-        return this;
+        var q_diff = Math.Abs(_q - a.q);
+        var r_diff = Math.Abs(_r - a.r);
+        var s_diff = Math.Abs(_s - a.s);
+
+        if ((q_diff > r_diff) && (q_diff > s_diff)){
+            _q = -_r-_s;
+        }else if (r_diff > s_diff){
+            _r = -_q-_s;
+        }else{
+            _s = -_q-_r;
+        }
+        var c = new Cube(_q,_r,_s);
+        Debug.Log($"Resulted in: {c.ToString()}");
+        return c;
     }
 
-    public Cube Round(){
-        var _q = Mathf.Round(this.q);
-        var _r = Mathf.Round(this.r);
-        var _s = Mathf.Round(this.s);
-
-        var q_diff = Math.Abs(_q - q);
-        var r_diff = Math.Abs(_r - r);
-        var s_diff = Math.Abs(_s - s);
-
-        if (q_diff > r_diff && q_diff > s_diff)
-            q = -r-s;
-        else if (r_diff > s_diff)
-            r = -q-s;
-        else
-            s = -q-r;
-        
-        return this;
+    public bool ListContains(List<Cube> list, Cube a){
+        foreach(Cube c in list){
+            if (c.q == a.q
+                && c.r == a.r
+                && c.s == c.r)
+                {
+                    return true;
+                }
+        }
+        return false;
     }
 
     public Vector3 GetCubeAsVector3(){
@@ -127,6 +226,14 @@ public class Cube
     }
     public float GetDistanceTo(Cube b){
         return ((Math.Abs(this.q - b.q) + Math.Abs(this.r - b.r) + Math.Abs(this.s - b.s)) / 2);
+    }
+
+    public Cube lerp(Cube b, float t){
+        return new Cube(
+            (this.q + (b.q - this.q) * t),
+            (this.r + (b.r - this.r) * t),
+            (this.s + (b.s - this.s) * t)
+        );
     }
 
     public Cube Add(Cube a, Cube b){
@@ -144,9 +251,49 @@ public class Cube
         );
     }
 
+    // TKTK - fix this to accept an int direction referencing a neighbor
     public Cube Neighbor(Cube c, Cube d){
         return Add(c, d);
     }
+
+    /*
+     * Checks if this Cube instance has the same coordinates as Cube 'a'.
+    */
+    public bool Compare(Cube a){
+        return (this.q == a.q && this.r == a.r && this.s == a.s);
+    }
+
+    /*
+     * Creates a list of all cubes touched by a line drawn from this cube to a dest cube.
+     * Default 'los' option will break the loop if a cube along the path cooresponds to a
+     * non-traversable tile.
+     * Note: when calculating with LoS, the source tile's traversability is ignored (i.e. the tile coorsponding to this cube)
+    */
+    public List<Cube> DrawLine(Cube dst, bool los = true, bool includeTargets = true){
+        var N = GetDistanceTo(dst);
+        List<Cube> results = new List<Cube>();
+        var epsilon = new Cube((float)1e-6, (float)2e-6, (float)-3e-6);
+        dst = Add(dst, epsilon);
+
+        for (int i = 0; i <= N; i++){
+            var current = Round(lerp(dst, (1.0f/N * i)));
+            if (los == true
+                && (!Compare(current))
+                && (GridManager.Instance.isCubeTraversable(current) == false)){
+                    if (includeTargets && GridManager.Instance.isCubeTargettable(current))
+                        results.Add(current);
+                    break;
+                }
+
+            results.Add(current);
+        }
+        
+        return results;
+    }
+
+    /*
+     * Gets a ring of hexes in cube coordinates given a center hex and radius.
+    */
     public List<Cube> Ring(Cube center, int radius){
         var directions = new Cube_Directions();
         var results = new List<Cube>();
@@ -160,5 +307,49 @@ public class Cube
         }
 
         return results;
+    }
+
+    /*
+     * Find all cube coordinates within 'distance' steps from this one.
+     * Takes non-traversabel tiles into account.
+     * Returns list of those cube coordinates.
+    */
+    public List<Cube> FindReachable(int distance){
+        Debug.Log("Move: FindReachable Enter");
+        Cube a = this;
+        var directions = new Cube_Directions();
+        List<Cube> visited = new List<Cube>();
+        visited.Add(a);
+        int i = 0;
+        int m = 0;
+        List<List<Cube>> fringes = new List<List<Cube>>(){new List<Cube>(){a}};
+        for (int k = 1; k <= distance; k++){
+            fringes.Add(new List<Cube>());
+            i++;
+            foreach(Cube b in fringes[k-1]){
+                //Debug.Log($"Fringe Cube: {b.ToString()}");
+                for (int j = 0; j < 6; j++){
+                    m++;
+                    var neighbor = Add(b, directions.MapIndex(j));
+                    if(!ListContains(visited, neighbor)){
+                        if (GridManager.Instance.isCubeTraversable(neighbor)){
+                            visited.Add(neighbor);
+                            fringes[k].Add(neighbor);
+                        }
+                    }
+                    
+                    if (m > 5000){
+                        Debug.Log("m reached 500");
+                        return visited;
+                    }
+                }
+            }
+            if (i > 100){
+                Debug.Log("m reached 100");
+                return visited;
+            }
+        }
+        Debug.Log("Move: FindReachable Exit");
+        return visited;
     }
 }

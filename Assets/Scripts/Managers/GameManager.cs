@@ -28,7 +28,8 @@ public class GameManager : MonoBehaviour
         GameState = newState;
         switch (newState){
             case GameState.GenerateGrid:
-                GridManager.Instance.GenerateAxialHexagram();
+                //GridManager.Instance.GenerateAxialHexagram();
+                GridManager.Instance.GenerateBoardFromTilemap();
                 break;
             case GameState.SpawnTeams:
                 List<Faction> teamList = new List<Faction>();
@@ -39,7 +40,8 @@ public class GameManager : MonoBehaviour
                 UnitManager.Instance.SpawnAllTeams(teamList);
                 break;
             case GameState.AwaitTurn:
-                UnitManager.Instance.beginTurn();
+                var activeUnit = UnitManager.Instance.beginTurn();
+                GridManager.Instance.CalculateMapTraversal(activeUnit.OccupiedTile);
                 break;
             case GameState.EndTurn:
                 UnitManager.Instance.endTurn();

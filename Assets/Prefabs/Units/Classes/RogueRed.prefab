@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7818772258732340543}
   - component: {fileID: 6559581044227076983}
   - component: {fileID: 1053466448478749172}
-  - component: {fileID: 528673964362826581}
+  - component: {fileID: 5508326401353356647}
   m_Layer: 0
   m_Name: RogueRed
   m_TagString: Untagged
@@ -101,20 +101,20 @@ MonoBehaviour:
   Health: 100
   Armor: 0.2
   MagicResist: 0.561
-  DistancePerTurn: 7
+  DistancePerTurn: 4
   AbilitiesConfig:
   - abilityPrefab: {fileID: 382792092602296448, guid: dc38b5716c2a3ab4680dccc8df38dc53, type: 3}
     binding: 49
-  - abilityPrefab: {fileID: 1377883224753548083, guid: 8b03cc7ad64e3c94a9ef81fb318269c0, type: 3}
+  - abilityPrefab: {fileID: 6731869066745356952, guid: 8b03cc7ad64e3c94a9ef81fb318269c0, type: 3}
     binding: 50
-  - abilityPrefab: {fileID: 4908767133395472827, guid: 3ab025070ec6a46439620f6fab19a0a5, type: 3}
+  - abilityPrefab: {fileID: 5807029455287119303, guid: 3ab025070ec6a46439620f6fab19a0a5, type: 3}
     binding: 51
-  animator: {fileID: 528673964362826581}
+  animator: {fileID: 5508326401353356647}
   Faction: 0
   UnitName: Beelzebub
   unitState: 0
   classType: 0
---- !u!95 &528673964362826581
+--- !u!95 &5508326401353356647
 Animator:
   serializedVersion: 4
   m_ObjectHideFlags: 0
@@ -122,9 +122,9 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 718599829369313763}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 3e0aac8d036d2e843aa92e0c6827aec9, type: 2}
+  m_Controller: {fileID: 9100000, guid: d9a78395ed010f249883da6e479a454c, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

@@ -17,6 +17,7 @@ public class Move : BaseAbility
 
 
     public virtual void Init(Tile origin, float dist, BaseUnit callerUnit){
+        Debug.Log("Move: Init Enter");
         SourceTile = origin;
         maxDistance = dist;
         Unit = callerUnit;
@@ -31,17 +32,19 @@ public class Move : BaseAbility
             onDown: MouseDownHandler
         );
         InitAffectedTiles();
+        Debug.Log("Move: Init Enter");
     }
 
     /*
     * 'Move' ability will affect all tiles within range of the unit's max move distance.
     */   
     protected override void InitAffectedTiles(){
-        var area = GridManager.Instance.CalculateArea(SourceTile.nodeBase.Coords, maxDistance);
-        var affectedTiles = GridManager.Instance.GetTilesInArea(area);
+        var affectedTiles = GridManager.Instance.GetTilesInMovementRange((int)maxDistance);
+
         foreach(Tile t in affectedTiles){
             t.SetAbilityEffectsController(TileEffectsController, true);
         }
+        Debug.Log("Move: InitAffectedTiles End");
     }
 
     /*
@@ -56,11 +59,13 @@ public class Move : BaseAbility
         if (unselectedPath != null)
             changePathHighlighting(unselectedPath, TileEvent.UnHighlight);
 
-        unselectedPath = GridManager.Instance.FindPath(SourceTile, destTile);
+        unselectedPath = getPath(SourceTile, destTile);
 
         if (!unselectedPath.Contains(SourceTile))
             unselectedPath.Add(SourceTile);
         changePathHighlighting(unselectedPath, TileEvent.Highlight);
+
+        tmpTile = destTile;
     }
 
     /*
@@ -72,7 +77,7 @@ public class Move : BaseAbility
     public void MouseDownHandler(Tile destTile){
         if (!destTile.Walkable)
             return;
-        // TKTK - Targetting will be handled/tracked by the ability instead of the unit.
+
         TargetTile = destTile;
 
         // If the tmp tile is the same as the clicked one, no need to recalculate path.
@@ -81,7 +86,9 @@ public class Move : BaseAbility
         }else{
             // Otherwise unhighlight the old path, calc the new one, and highlight it.
             changePathHighlighting(unselectedPath, TileEvent.UnHighlight);
-            selectedPath = GridManager.Instance.FindPath(SourceTile, TargetTile);
+
+            selectedPath = getPath(SourceTile, destTile);
+
             if (!selectedPath.Contains(SourceTile))
                 selectedPath.Add(SourceTile);
             changePathHighlighting(selectedPath, TileEvent.Highlight);
@@ -96,7 +103,30 @@ public class Move : BaseAbility
     }
 
     /*
-     * Applies un/highlighting to entire path.
+     * Unwinds the path from dst to src based on map traversal calculated by the grid
+     * manager at the start of the turn.
+    */
+    private List<Tile> getPath(Tile src, Tile dst){
+        var path = new List<Tile>();
+        var current = dst;
+
+        while (current != src){
+            path.Add(current);
+            current = current.Previous;
+            if (current == null){
+                Debug.Log($"Found null Tile.Previous");
+                break;
+            }
+        }
+
+        path.Add(current);
+        path.Reverse();
+
+        return path;
+    }
+
+    /*
+     * Applies un/highlighting to entire path (list).
     */
     private void changePathHighlighting(List<Tile> path, TileEvent te){
         foreach(Tile t in path)
@@ -128,7 +158,7 @@ public class Move : BaseAbility
             Unit.OccupiedTile.OccupiedUnit = null;
 
         // Move the unit to the targetted tile
-        Unit.transform.position = TargetTile.transform.position;
+        Unit.transform.position = TargetTile.transform.position + new Vector3(0,0.4f,0);
 
         // Update Tile <--> Unit tracking
         TargetTile.OccupiedUnit = Unit;
@@ -139,5 +169,7 @@ public class Move : BaseAbility
 
     public override void CleanUp(){
         GridManager.Instance.ResetAffectedTiles();
+        Destroy(TileEffectsController.gameObject);
+        Destroy(gameObject);
     }
 }

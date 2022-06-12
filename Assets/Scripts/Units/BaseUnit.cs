@@ -105,7 +105,7 @@ public abstract class BaseUnit : MonoBehaviour
             
             break;
          case AbilityType.AOE:
-            var aoeAbility = (Nova)ability;
+            var aoeAbility = (BaseAOE)ability;
             aoeAbility.Init(OccupiedTile, this);
             break;
          case AbilityType.Cleave:
@@ -145,6 +145,7 @@ public abstract class BaseUnit : MonoBehaviour
       if (SelectedAbility == null)
          return false;
 
+      animator.SetTrigger("AttackTrigger");
       var ret = SelectedAbility.Trigger();
       if (ret)
          SelectedAbility.CleanUp();
@@ -173,7 +174,7 @@ public abstract class BaseUnit : MonoBehaviour
    // Call this directly from ability if it bypasses damage reduction
    public float ApplyDamage(float damage){
       Health -= damage;
-
+      animator.SetTrigger("HurtTrigger");
       Debug.Log($"{UnitName} hit for {damage} damage!");
    
       if (Health <= 0)
