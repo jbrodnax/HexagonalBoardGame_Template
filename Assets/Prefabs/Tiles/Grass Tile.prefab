@@ -290,9 +290,9 @@ MonoBehaviour:
   _renderer: {fileID: 6335362877996162009}
   _highBrightness: 0.5
   _darkenStrength: 0.7
-  _isWalkable: 1
+  isWalkable: 1
+  isTargettable: 0
   movementCost: 1
-  Distance: 0
   Previous: {fileID: 0}
   Infinity: 10000
   TileName: Grass

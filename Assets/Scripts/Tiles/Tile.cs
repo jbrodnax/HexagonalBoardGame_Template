@@ -13,7 +13,8 @@ public abstract class Tile : MonoBehaviour
     [SerializeField] [Range(0f, 1f)] protected float _highBrightness;
     [SerializeField] [Range(0f, 1f)] protected float _darkenStrength;
     // Defines whether or not a tile is traversable (e.g. grass vs mountain)
-    [SerializeField] private bool _isWalkable;
+    [SerializeField] private bool isWalkable;
+    [SerializeField] private bool isTargettable;
     [SerializeField] private int movementCost;
     
     private TextMeshPro displayText;
@@ -28,8 +29,7 @@ public abstract class Tile : MonoBehaviour
     public BaseUnit OccupiedUnit;
 
     // Walkable is true if this terrain is traversable and is not currently occupied by another unit
-    public bool Walkable => _isWalkable && OccupiedUnit == null;
-    public bool Reachable {get; set;}
+    public bool Walkable => isWalkable && OccupiedUnit == null;
 
     public List<Tile> Neighbors;
     protected Color _highlighted;
@@ -41,17 +41,60 @@ public abstract class Tile : MonoBehaviour
 
     private TileEffects AbilityEffectsController;
 
-    // Virtual methods can be overridden by classes that inherit this class
-    public virtual void Init(Vector2 coords, bool altColor)
+
+    /// <summary>
+    /// Initializes the tile's attributes, as well as converts world coordinates of bounding grid cell
+    /// to clean, whole number Cube coordinates.
+    /// </summary>
+    /// <param name="coords">World coordinates of the tile's center.</param>
+    /// <param name="worldToCube">true: converts and cleans up the world coords.</param>
+    public virtual void Init(Vector2 coords, bool worldToCube)
     {
+        if (worldToCube){
+            coords = cleanWorldCoordinates(coords);
+        }
         nodeBase = new NodeBase(this, coords);
         this.name = $"Tile {coords.x} {coords.y}";
-        Reachable = false;
         EffectsDelegate = _defaultHighlight;
         distance = Infinity;
         Previous = null;
         displayText = GetComponentInChildren<TextMeshPro>();
         displayText.enabled = false;
+    }
+
+
+    /// <summary>
+    /// Converts messy floating-point world coordinates to Odd-q Offset coordinates, inverts the 
+    /// y-axis to simulate Screen coordinate system, and then converts those coordinates to axial.
+    /// </summary>
+    /// <param name="v2">The world coordinates to convert.</param>
+    /// <returns>Axial coordinates.</returns>
+    private Vector2Int cleanWorldCoordinates(Vector2 v2){
+        var cellSize = GridManager.Instance.Grid.cellSize;
+        var oddColOffset = cellSize.x / 2;
+        var ySpacing = Mathf.Sqrt(3)/2;
+        var xSpacing = (3f/4f);
+
+        Vector2Int coords = new Vector2Int();
+        coords.x = Mathf.RoundToInt(v2.x/xSpacing);
+
+        if (coords.x % 2 != 0){
+            if (v2.y > 0 && v2.y < ySpacing)
+                coords.y = 1;
+            else if (v2.y > 0 && v2.y > ySpacing)
+                coords.y = Mathf.RoundToInt((v2.y - oddColOffset) / (ySpacing))+1;
+            else if (v2.y < 0)
+                coords.y = Mathf.RoundToInt((v2.y + oddColOffset) / (ySpacing));
+            else
+                Debug.Log($"Reached odd case: {coords}");
+        }else{
+            coords.y = Mathf.RoundToInt((v2.y) / ySpacing);
+        }
+
+        // Invert y-axis
+        coords.y = -coords.y;
+
+        return GridManager.Instance.OddqToAxial(coords);
     }
 
     public void SetNeighbors(List<Tile> neighbors){
@@ -140,10 +183,6 @@ public abstract class Tile : MonoBehaviour
 
         // Allow grid manager to track tiles affected by abilities
         GridManager.Instance.AffectedTiles.Enqueue(this);
-
-        if (setReachable){
-            Reachable = true;
-        }
     }
 
     /*
@@ -155,7 +194,6 @@ public abstract class Tile : MonoBehaviour
             _renderer.color = AbilityEffectsController.Unset(this);
             EffectsDelegate = _defaultHighlight;
             AbilityEffectsController = null;
-            Reachable = false;
             return;
         }
         _renderer.color = _original;

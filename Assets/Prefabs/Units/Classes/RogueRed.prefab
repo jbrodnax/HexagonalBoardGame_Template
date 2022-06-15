@@ -101,7 +101,7 @@ MonoBehaviour:
   Health: 100
   Armor: 0.2
   MagicResist: 0.561
-  DistancePerTurn: 4
+  DistancePerTurn: 10
   AbilitiesConfig:
   - abilityPrefab: {fileID: 382792092602296448, guid: dc38b5716c2a3ab4680dccc8df38dc53, type: 3}
     binding: 49
@@ -109,6 +109,8 @@ MonoBehaviour:
     binding: 50
   - abilityPrefab: {fileID: 5807029455287119303, guid: 3ab025070ec6a46439620f6fab19a0a5, type: 3}
     binding: 51
+  - abilityPrefab: {fileID: 66934389448637367, guid: 75d741db4f766d34181f163014a76864, type: 3}
+    binding: 52
   animator: {fileID: 5508326401353356647}
   Faction: 0
   UnitName: Beelzebub

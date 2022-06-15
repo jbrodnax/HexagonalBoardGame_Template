@@ -14,7 +14,7 @@ public class MapSelectionDropDown : MonoBehaviour
         dropdown.options.Clear();
 
         var ddItems = new List<string>();
-        ddItems.Add("Select a Scene");
+        ddItems.Add("Select a Map");
         ddItems.Add("Map1");
         ddItems.Add("Map2 (Not Implemented)");
 

@@ -16,6 +16,7 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Transform camTransform;
     private Camera mainCamera;
 
+    public Grid Grid { get { return grid; } }
     public static GridManager Instance;
     private Dictionary<Vector2, Tile> _tiles;
 
@@ -61,7 +62,7 @@ public class GridManager : MonoBehaviour
                 var newTile = Instantiate(tilePrefab, v, Quaternion.identity);
 
                 var v2 = new Vector2(q,r);
-                newTile.Init(v2, colorOffset);
+                newTile.Init(v2, false);
                 _tiles[v2] = newTile;
 
                 colorOffset = colorOffset ? false : true;
@@ -80,13 +81,19 @@ public class GridManager : MonoBehaviour
         GameManager.Instance.ChangeState(GameState.SpawnTeams);
     }
 
+
+    /// <summary>
+    /// Finds all sprites in the tilemap and places the corresponding real Tile on top of them.
+    /// Tilemap is destroyed afterwards.
+    /// Transforms the camera to fit the map size and changes the gamestate to spawn the teams.
+    /// </summary>
     public void GenerateBoardFromTilemap(){
         _tiles = new Dictionary<Vector2, Tile>();
         AffectedTiles = new Queue<Tile>();
 
         var oddColOffset = grid.cellSize.x / 2;
         var ySpacing = Mathf.Sqrt(3)/2;
-        var xSpacing = (3f/4f);
+        //var xSpacing = (3f/4f);
         tilemap.CompressBounds();
 
         foreach (var position in tilemap.cellBounds.allPositionsWithin) {
@@ -97,46 +104,26 @@ public class GridManager : MonoBehaviour
             var worldPos = grid.GetCellCenterWorld(position);
             Vector2 v2 = new Vector2(worldPos.x, worldPos.y);
             
+            // Find the right tile prefab and instantiate it over the tilemap sprite.
             foreach (TileReplacement tr in spriteToPrefabLinks){
                 if (tr.TileSprite.name.Equals(tileSprite.name)){
                     var newTile = Instantiate(tr.TilePrefab, v2, Quaternion.identity);
-                    Vector2Int coords = new Vector2Int();
-                    coords.x = Mathf.RoundToInt(v2.x/xSpacing);
-
-                    if (coords.x % 2 != 0){
-                        if (v2.y > 0 && v2.y < ySpacing)
-                            coords.y = 1;//Mathf.RoundToInt((v2.y) / oddColOffset);
-                        else if (v2.y > 0 && v2.y > ySpacing)
-                            coords.y = Mathf.RoundToInt((v2.y - oddColOffset) / (ySpacing))+1;
-                        else if (v2.y < 0)
-                            coords.y = Mathf.RoundToInt((v2.y + oddColOffset) / (ySpacing));
-                        else
-                            Debug.Log($"Reached odd case: {coords}");
-                    }else{
-                        coords.y = Mathf.RoundToInt((v2.y) / ySpacing);
-                    }
-
-                    // Invert y-axis
-                    coords.y = -coords.y;
-                    //Debug.Log($"Offset Coords: {coords}");
-                    //newTile.DisplayCellCoords(coords);
-
-                    var axialCoords = OddqToAxial(coords);
-                    //Debug.Log($"Axial Coords: {axialCoords}");
-
-                    newTile.Init(axialCoords, false);
+                    
+                    newTile.Init(v2, true);
+                    var axialCoords = newTile.nodeBase.Coords;
                     _tiles[axialCoords] = newTile;
                 }
             }
         }
 
-        TilemapRenderer tmRend = tilemap.GetComponent<TilemapRenderer>();
-        Destroy(tmRend);
-        Destroy(tilemap);
         // Reposition camera to center of board
         camTransform.transform.position = new Vector3(0, 0, -5);
         mainCamera = Camera.main;
         mainCamera.orthographicSize = ((float)tilemap.size.x / 2) + 0.5f;
+
+        TilemapRenderer tmRend = tilemap.GetComponent<TilemapRenderer>();
+        DestroyImmediate(tmRend);
+        DestroyImmediate(tilemap);
 
         // Populate neighbor tracking for each tile
         initTileNeighbors();
@@ -145,12 +132,22 @@ public class GridManager : MonoBehaviour
         GameManager.Instance.ChangeState(GameState.SpawnTeams);
     }
 
+    /// <summary>
+    /// Convert Odd-q offset coordinates to Cube coordinates as a Vector3Int.
+    /// </summary>
+    /// <param name="v2">Offset coordinates</param>
+    /// <returns>Vector3Int containing Cube coordinates.</returns>
     public Vector3Int OddqToCube(Vector2Int v2){
         var q = v2.x;
         var r = v2.y - (v2.x - (v2.x & 1)) / 2;
         return new Vector3Int(q, r, -q-r);
     }
 
+    /// <summary>
+    /// Convert Odd-q offset coordinates to Axial coordinates as a Vector2Int
+    /// </summary>
+    /// <param name="v2">Offset coordinates</param>
+    /// <returns>Vector2Int containing Axial coordinates.</returns>
     public Vector2Int OddqToAxial(Vector2Int v2){
         var q = v2.x;
         var r = v2.y - (v2.x - (v2.x & 1)) / 2;
@@ -166,16 +163,7 @@ public class GridManager : MonoBehaviour
     public Tile GetRandomTile(){
         return _tiles.Where(t => t.Value.Walkable).OrderBy(t => UnityEngine.Random.value).First().Value;
     }
-    // Returns random tile from the left-hand side of the board
-    public Tile GetLeftHandSpawnTile(){
-        return _tiles.Where(t => (t.Key.x < radius/2) && t.Value.Walkable).OrderBy(t => UnityEngine.Random.value).First().Value;
-    }
-
-    // Returns random tile from the right-hand side of the board
-    public Tile GetRightHandSpawnTile(){
-        return _tiles.Where(t => (t.Key.x > radius/2) && t.Value.Walkable).OrderBy(t => UnityEngine.Random.value).First().Value;
-    }
-
+    
     public void ResetAffectedTiles(){
         Debug.Log("Resetting Affected Tiles");
         Tile tile;
