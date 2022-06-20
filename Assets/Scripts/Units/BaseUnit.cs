@@ -109,7 +109,8 @@ public abstract class BaseUnit : MonoBehaviour
             aoeAbility.Init(OccupiedTile, this);
             break;
          case AbilityType.Cleave:
-            // TKTK
+            var cleaveAbility = (BaseCleave)ability;
+            cleaveAbility.Init(OccupiedTile, this);
             break;
          case AbilityType.Projectile:
             var projAbility = (OffensiveAbility)ability;
@@ -196,6 +197,33 @@ public abstract class BaseUnit : MonoBehaviour
 
       return ApplyDamage(damage);
    }
+
+   public class DirectionHandler{
+        private Tile face;
+        private Tile spine;
+        private Tile[] front;
+        private Tile[] back;
+        private Cardinal facing;
+
+        public Tile Face {get { return face; }set { face = value; } }
+        public Tile Spine {get { return spine; } set { spine = value; } }
+        public Tile[] Front {get { return front; } set { front = value; } }
+        public Tile[] Back {get { return back; } set { back = value; } }
+        public Cardinal Facing {get { return facing; } set { facing = value; } }
+
+        public DirectionHandler(Cardinal direction, Tile origin){
+            facing = direction;
+            var originCube = origin.nodeBase.GetCubeFromThis();
+            var f1 = (facing == Cardinal.N) ? Cardinal.NW : (facing - 1);
+            var f2 = facing;
+            var f3 = (facing == Cardinal.NW) ? Cardinal.N : (facing + 1);
+            var directions = originCube.Directions;
+
+            var frontCubes = new Cube[] {
+               
+            };
+        }
+    }
 }
 
 [Serializable]

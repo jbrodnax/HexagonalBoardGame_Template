@@ -109,6 +109,8 @@ MonoBehaviour:
     binding: 50
   - abilityPrefab: {fileID: 5807029455287119303, guid: 3ab025070ec6a46439620f6fab19a0a5, type: 3}
     binding: 51
+  - abilityPrefab: {fileID: 8759809340284536716, guid: 932609f91733a584db7be65ae2a61e6a, type: 3}
+    binding: 52
   animator: {fileID: 7415692139092016956}
   Faction: 1
   UnitName: Sexy Little Thang

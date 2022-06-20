@@ -165,6 +165,14 @@ public class Cube_Directions
     }
 }
 
+public enum Cardinal{
+    N = 0,
+    NE = 1,
+    SE = 2,
+    S = 3,
+    SW = 4,
+    NW = 5
+}
 
 public class Cube
 {
@@ -182,6 +190,15 @@ public class Cube
     {
         return $"({q}, {r}, {s})";
     }
+
+    public Cube[] Directions = new Cube[]{
+        new Cube(0, -1, 1), // N
+        new Cube(1, -1, 0), // NE
+        new Cube(1, 0, -1), // SE
+        new Cube(0, 1, -1), // S
+        new Cube(-1, 1, 0), // SW
+        new Cube(-1, 0, 1), // NW
+};
 
     public Vector2 GetAxial(){
         return (new Vector2(q,r));
@@ -303,6 +320,33 @@ public class Cube
             for (int j = 0; j < radius; j++){
                 results.Add(nextCube);
                 nextCube = Neighbor(nextCube, directions.MapIndex(i));
+            }
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Finds all hexes within a horizontal diamond shape originating from src, spreading in direction dir, with a range of `range`.
+    /// </summary>
+    /// <param name="src">Origin cube coordinates.</param>
+    /// <param name="dir">Direction the diamond should be projected (as a neighboring hex tile).</param>
+    /// <param name="range">The length of the sides of the diamond.</param>
+    /// <returns>List of Cube coordinates that comprise the diamond.</returns>
+    public List<Cube> DiamondCleave(Cube src, Cube dir, int range){
+        var results = new List<Cube>();
+        var qstart = Math.Min(0, ((int)dir.q * range));
+        var qstop = Math.Max(0, ((int)dir.q * range));
+
+        var rstart = Math.Min(0, ((int)dir.r * range));
+        var rstop = Math.Max(0, ((int)dir.r * range));
+
+        foreach (int q in Enumerable.Range(qstart, range+1))
+        {
+            foreach (int r in Enumerable.Range(rstart, range+1))
+            {
+                var s = -q - r;
+                results.Add(Add(src, new Cube(q, r, s)));
             }
         }
 
