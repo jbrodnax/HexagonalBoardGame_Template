@@ -81,5 +81,28 @@ TKTK
 * AoE buffs affect tile movement costs.
 * Implement who Vanari faction first along with all of their abilities (multiple instances of the faction at a time can play against each other).
 
+## TODO Components
+
+### Server
+---
+
+**Capabilities**
+
+* Authentication / Authorization (flat?)
+* Lobby Hosting / Game Creation
+    * Map awerness. Uploading new maps to server?
+* Game Management:
+    * Relay and synchronize game event data across clients
+    * Validate events of each player turn (movement, ability usage, buffs, unit level)
+    * Validate requests i.e. is the request coming from a client whose turn it is?
+
+**Design**
+
+* Custom TCP protocol
+* 1 request per turn. Sent at end of turn, summarizing events of the turn.
+* Server validates the request, and the events of the request.
+* If valid, relay updated game state to connected clients.
+* If NOT valid, notify all clients of an invalid move and that the turn is still in affect.
+
 ## External Resources
 * **Redblob Games**: https://www.redblobgames.com/grids/hexagons/
