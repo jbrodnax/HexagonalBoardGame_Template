@@ -86,6 +86,12 @@ TKTK
 ### Server
 ---
 
+**Client Connection Flow**
+
+![Client Connection Flow Diagram](./.docassets/ClientConnect_Workflow.PNG)
+
+
+
 **Capabilities**
 
 * Authentication / Authorization (flat?)
@@ -98,7 +104,7 @@ TKTK
 
 **Design**
 
-* Custom TCP protocol
+* Custom TCP Protocol
 * 1 request per turn. Sent at end of turn, summarizing events of the turn.
 * Server validates the request, and the events of the request.
 * If valid, relay updated game state to connected clients.
