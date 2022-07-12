@@ -29,7 +29,7 @@ public class BaseCleave : OffensiveAbility
         Debug.Log($"InitAffectedTiles: {AbilityName}");
         var sourceCube = SourceTile.nodeBase.GetCubeFromThis();
         // TKTK - hardcoded NE direction parameter. Change once better directions are implemented.
-        var affectedCubes = sourceCube.DiamondCleave(sourceCube, new Cube(1, -1, 0), range);
+        var affectedCubes = sourceCube.Diamond(sourceCube, new Cube(1, -1, 0), range);
         foreach (Cube c in affectedCubes){
             Debug.Log($"{c.ToString()}");
         }

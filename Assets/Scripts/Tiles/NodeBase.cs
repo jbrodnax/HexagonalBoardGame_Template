@@ -191,6 +191,8 @@ public class Cube
         return $"({q}, {r}, {s})";
     }
 
+    // IMPORTANT - commented out due to accidental infinite recursion during constructor
+    /*
     public Cube[] Directions = new Cube[]{
         new Cube(0, -1, 1), // N
         new Cube(1, -1, 0), // NE
@@ -198,8 +200,8 @@ public class Cube
         new Cube(0, 1, -1), // S
         new Cube(-1, 1, 0), // SW
         new Cube(-1, 0, 1), // NW
-};
-
+    };
+    */
     public Vector2 GetAxial(){
         return (new Vector2(q,r));
     }
@@ -273,6 +275,61 @@ public class Cube
         return Add(c, d);
     }
 
+    /// <summary>
+    /// Finds the neighboring Cube given a Cardinal and source Cube.
+    /// </summary>
+    /// <param name="c">The source cube, from which to find the neighbor.</param>
+    /// <param name="dir">The Cardinal direction of the neighbor to get.</param>
+    /// <returns></returns>
+    public Cube GetNeighbor(Cube c, Cardinal dir)
+    {
+        switch (dir)
+        {
+            case Cardinal.N:
+                return Neighbor(c, new Cube(0, -1, 1));
+            case Cardinal.NE:
+                return Neighbor(c, new Cube(1, -1, 0));
+            case Cardinal.SE:
+                return Neighbor(c, new Cube(1, 0, -1));
+            case Cardinal.S:
+                return Neighbor(c, new Cube(0, 1, -1));
+            case Cardinal.SW:
+                return Neighbor(c, new Cube(-1, 1, 0));
+            case Cardinal.NW:
+                return Neighbor(c, new Cube(-1, 0, 1));
+            default:
+                Debug.LogError("Cube.GetNeighbor received invalid Cardinal");
+                return null;
+        }
+    }
+
+    /// <summary>
+    /// Converts a Cardinal into the cooresponding Cube vector
+    /// </summary>
+    /// <param name="dir">Cardinal direction.</param>
+    /// <returns>Cube vector</returns>
+    public Cube CardinalToCube(Cardinal dir)
+    {
+        switch (dir)
+        {
+            case Cardinal.N:
+                return new Cube(0, -1, 1);
+            case Cardinal.NE:
+                return new Cube(1, -1, 0);
+            case Cardinal.SE:
+                return new Cube(1, 0, -1);
+            case Cardinal.S:
+                return new Cube(0, 1, -1);
+            case Cardinal.SW:
+                return new Cube(-1, 1, 0);
+            case Cardinal.NW:
+                return new Cube(-1, 0, 1);
+            default:
+                Debug.LogError("Cube.CardinalToCube received invalid Cardinal direction");
+                return null;
+        }
+    }
+
     /*
      * Checks if this Cube instance has the same coordinates as Cube 'a'.
     */
@@ -333,7 +390,7 @@ public class Cube
     /// <param name="dir">Direction the diamond should be projected (as a neighboring hex tile).</param>
     /// <param name="range">The length of the sides of the diamond.</param>
     /// <returns>List of Cube coordinates that comprise the diamond.</returns>
-    public List<Cube> DiamondCleave(Cube src, Cube dir, int range){
+    public List<Cube> Diamond(Cube src, Cube dir, int range){
         var results = new List<Cube>();
         var qstart = Math.Min(0, ((int)dir.q * range));
         var qstop = Math.Max(0, ((int)dir.q * range));

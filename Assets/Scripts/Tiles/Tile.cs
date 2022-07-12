@@ -40,6 +40,9 @@ public abstract class Tile : MonoBehaviour
     handleHighlight EffectsDelegate;
 
     private TileEffects AbilityEffectsController;
+    private TestBaseAbility AbilityController;
+    public Color GetColor {get { return _renderer.color; } }
+    public Color AbilityBaseColor {get; set;}
 
 
     /// <summary>
@@ -108,6 +111,11 @@ public abstract class Tile : MonoBehaviour
             return;
         }
 
+        if (AbilityController != null){
+            AbilityController.MouseDownHandler(this);
+            return;
+        }
+
         UnitManager.Instance.SelectTile(this);
     }
 
@@ -117,6 +125,11 @@ public abstract class Tile : MonoBehaviour
 
         if (AbilityEffectsController != null){
             AbilityEffectsController.OnMouseEnter(this);
+            return;
+        }
+
+        if (AbilityController != null){
+            AbilityController.MouseEnterHandler(this);
             return;
         }
     
@@ -129,6 +142,11 @@ public abstract class Tile : MonoBehaviour
 
         if (AbilityEffectsController != null){
             AbilityEffectsController.OnMouseExit(this);
+            return;
+        }
+
+        if (AbilityController != null){
+            AbilityController.MouseExitHandler(this);
             return;
         }
 
@@ -183,6 +201,26 @@ public abstract class Tile : MonoBehaviour
 
         // Allow grid manager to track tiles affected by abilities
         GridManager.Instance.AffectedTiles.Enqueue(this);
+    }
+
+    public void SetAbilityController(TestBaseAbility ability, Color initcolor){
+        if (AbilityController != null)
+            _renderer.color = OriginalColor;
+
+        AbilityController = ability;
+        _renderer.color = AbilityBaseColor = initcolor;
+
+        EffectsDelegate = ability.AbilityHighlightHandler;
+    }
+
+    public void UnsetAbilityController(){
+        if (AbilityController != null){
+            _renderer.color = OriginalColor;
+            EffectsDelegate = _defaultHighlight;
+            AbilityController = null;
+            return;
+        }
+        _renderer.color = OriginalColor;
     }
 
     /*

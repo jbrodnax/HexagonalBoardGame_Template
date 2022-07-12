@@ -29,6 +29,12 @@ public class UnitManager : MonoBehaviour
             ActiveUnit.DeselectAbility();
         }
 
+        // TKTK - remove 7/10
+        if (Input.GetKeyDown(KeyCode.J)){
+            TestBaseAbility ability = Instantiate(ActiveUnit.testBaseAbility);
+            ability.Init(ActiveUnit.OccupiedTile, ActiveUnit);
+        }
+
         foreach(AbilityBinding configItem in ActiveUnit.AbilitiesConfig){
             if (Input.GetKeyDown(configItem.binding)){
                 ActiveUnit.SelectAbility(configItem);

@@ -13,7 +13,8 @@ public abstract class BaseAbility : MonoBehaviour
     [SerializeField] public string AbilityName;
     [SerializeField] public AbilityType AbilityType;
     [SerializeField] public TileEffects TileEffectsPrefab;
-    
+    [SerializeField] public List<Action> Actions;
+
     protected Tile sourceTile;
     public Tile SourceTile {get {return sourceTile;} set {sourceTile = value;}}
     private Tile targetTile;

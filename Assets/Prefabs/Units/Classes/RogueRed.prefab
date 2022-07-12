@@ -112,6 +112,7 @@ MonoBehaviour:
   - abilityPrefab: {fileID: 8759809340284536716, guid: 932609f91733a584db7be65ae2a61e6a, type: 3}
     binding: 52
   animator: {fileID: 5508326401353356647}
+  testBaseAbility: {fileID: 8704068277364082444, guid: 6c41122c61aa6c641beeb9ca4b20b8ef, type: 3}
   Faction: 0
   UnitName: Beelzebub
   unitState: 0

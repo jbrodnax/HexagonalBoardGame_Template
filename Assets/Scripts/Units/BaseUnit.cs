@@ -12,10 +12,12 @@ public abstract class BaseUnit : MonoBehaviour
    [SerializeField] public float DistancePerTurn;
    [SerializeField] public AbilityBinding[] AbilitiesConfig;
    [SerializeField] public Animator animator;
-   // END ATTRIBUTES
+   // TKTK - remove 7/10
+    [SerializeField] public TestBaseAbility testBaseAbility;
+    // END ATTRIBUTES
 
-   // Tile that this unit currently occupies
-   private Tile occupiedTile;
+    // Tile that this unit currently occupies
+    private Tile occupiedTile;
    public Tile OccupiedTile
    {
       get {return occupiedTile;} set {occupiedTile = value;}
@@ -217,7 +219,8 @@ public abstract class BaseUnit : MonoBehaviour
             var f1 = (facing == Cardinal.N) ? Cardinal.NW : (facing - 1);
             var f2 = facing;
             var f3 = (facing == Cardinal.NW) ? Cardinal.N : (facing + 1);
-            var directions = originCube.Directions;
+            // IMPORTANT - commented out due to accidental infinite recursion during constructor
+            //var directions = originCube.Directions;
 
             var frontCubes = new Cube[] {
                
